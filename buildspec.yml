@@ -5,27 +5,52 @@ phases:
     commands:
       - echo "Installing dependencies"
       - sudo yum update -y --exclude=google-chrome-stable
-      - echo "Enabling EPEL repository..."
-      - sudo amazon-linux-extras install epel -y
       - echo "Installing build tools and core libraries..."
       - sudo yum install -y gcc gcc-c++ make cmake3 python3-devel
-      - echo "Installing PCL dependencies..."
-      - sudo yum install -y boost-devel eigen3-devel flann-devel vtk-devel
-      - echo "Installing additional required libraries..."
-      - sudo yum install -y armadillo-devel libxlsxwriter-devel
-      - echo "Installing PCL..."
-      - sudo yum install -y pcl-devel || echo "PCL not available in repos, will need to build from source"
+      - echo "Installing available libraries..."
+      - sudo yum install -y boost-devel eigen3-devel wget git
       - sudo alternatives --install /usr/bin/cmake cmake /usr/bin/cmake3 1
+      - echo "Installing libxlsxwriter from source..."
+      - cd /tmp
+      - git clone https://github.com/jmcnamara/libxlsxwriter.git
+      - cd libxlsxwriter
+      - make
+      - sudo make install
+      - cd $CODEBUILD_SRC_DIR
+      - echo "Installing Armadillo from source..."
+      - cd /tmp
+      - wget http://sourceforge.net/projects/arma/files/armadillo-9.900.1.tar.xz
+      - tar -xf armadillo-9.900.1.tar.xz
+      - cd armadillo-9.900.1
+      - cmake .
+      - make
+      - sudo make install
+      - cd $CODEBUILD_SRC_DIR
+      - echo "Installing PCL dependencies..."
+      - sudo yum install -y flann-devel vtk-devel || echo "Some PCL deps not available"
+      - echo "Installing PCL from source..."
+      - cd /tmp
+      - wget https://github.com/PointCloudLibrary/pcl/archive/pcl-1.10.0.tar.gz
+      - tar -xzf pcl-1.10.0.tar.gz
+      - cd pcl-pcl-1.10.0
+      - mkdir build && cd build
+      - cmake -DCMAKE_BUILD_TYPE=Release ..
+      - make -j$(nproc)
+      - sudo make install
+      - sudo ldconfig
+      - cd $CODEBUILD_SRC_DIR
   pre_build:
     commands:
       - echo "Starting build..."
       - chmod +x ./treeseg/scripts/build.sh
-      # Update Python paths in CMakeLists.txt for Amazon Linux
+      - echo "Updating Python paths in CMakeLists.txt..."
       - sed -i 's|/Library/Frameworks/Python.framework/Versions/3.11|/usr|g' treeseg/CMakeLists.txt
       - sed -i 's|libpython3.11.dylib|libpython3.7m.so|g' treeseg/CMakeLists.txt
   build:
     commands:
       - echo "Running build script"
+      - export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
+      - export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
       - ./treeseg/scripts/build.sh
   post_build:
     commands:
