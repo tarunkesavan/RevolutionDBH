@@ -5,7 +5,7 @@ phases:
     commands:
       - echo "Installing dependencies"
       - sudo yum update -y --exclude=google-chrome-stable
-      - sudo yum install -y gcc gcc-c++ make cmake3
+      - sudo yum install -y gcc gcc-c++ make cmake3 python3-devel
       - sudo alternatives --install /usr/bin/cmake cmake /usr/bin/cmake3 1
   pre_build:
     commands:
