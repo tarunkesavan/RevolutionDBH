@@ -5,22 +5,17 @@ phases:
     commands:
       - echo "Installing dependencies"
       - apt-get update
-      - apt-get install -y software-properties-common
-      - add-apt-repository -y ppa:ubuntu-toolchain-r/test
-      - apt-get update
-      - apt-get install -y g++-9 build-essential cmake python3-dev
+      - apt-get install -y build-essential cmake python3-dev
       - apt-get install -y libpcl-dev libarmadillo-dev libxlsxwriter-dev
-      - update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 100
-      - echo "Using compiler:"
-      - g++ --version
       - echo "Checking Python installation..."
       - python3 --version
       - python3-config --includes
-
   pre_build:
     commands:
       - echo "Starting build..."
       - chmod +x ./treeseg/scripts/build.sh
+      - echo "Updating C++ standard to C++17..."
+      - sed -i 's/set(CMAKE_CXX_STANDARD 11)/set(CMAKE_CXX_STANDARD 17)/g' treeseg/CMakeLists.txt
       - echo "Updating Python paths in CMakeLists.txt..."
       - |
         PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
@@ -33,17 +28,12 @@ phases:
         sed -i "s|set(Python3_ROOT_DIR \"/Library/Frameworks/Python.framework/Versions/3.11\")|set(Python3_ROOT_DIR \"/usr\")|g" treeseg/CMakeLists.txt
         sed -i "s|/Library/Frameworks/Python.framework/Versions/3.11/include/python3.11|$PYTHON_INCLUDE|g" treeseg/CMakeLists.txt
         sed -i "s|/Library/Frameworks/Python.framework/Versions/3.11/lib/libpython3.11.dylib|$PYTHON_LIB/$PYTHON_LIBNAME|g" treeseg/CMakeLists.txt
-
-      - echo "Ensuring C++17 is enabled in CMakeLists.txt..."
-      - |
-        grep -q "set(CMAKE_CXX_STANDARD 17)" treeseg/CMakeLists.txt || echo "set(CMAKE_CXX_STANDARD 17)" >> treeseg/CMakeLists.txt
-        grep -q "set(CMAKE_CXX_STANDARD_REQUIRED ON)" treeseg/CMakeLists.txt || echo "set(CMAKE_CXX_STANDARD_REQUIRED ON)" >> treeseg/CMakeLists.txt
-
+      - echo "Updated CMakeLists.txt:"
+      - cat treeseg/CMakeLists.txt | head -20
   build:
     commands:
       - echo "Running build script"
       - ./treeseg/scripts/build.sh
-
   post_build:
     commands:
       - echo "Build finished, checking output..."
