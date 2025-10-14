@@ -2,13 +2,24 @@ version: 0.2
 
 phases:
   install:
+    runtime-versions:
+      gcc: 12
+      cmake: 3
     commands:
-      - echo "Nothing to install"
+      - echo "Installing dependencies..."
+      - sudo apt-get update
+      - sudo apt-get install -y build-essential cmake
+  pre_build:
+    commands:
+      - echo "Starting build..."
   build:
     commands:
-      - echo "Nothing to build"
+      - echo "Running build script"
+      - ./treeseg/scripts/build.sh
+  post_build:
+    commands:
+      - echo "Build finished, artifacts ready"
 
 artifacts:
   files:
-    - appspec.yml
-    - demo/**/*
+    - treeseg/deploy/**/*

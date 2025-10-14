@@ -2,18 +2,11 @@ version: 0.0
 os: linux
 
 files:
-  - source: demo/dummy.txt
-    destination: /home/ubuntu/dummy_app/
-  - source: demo/scripts/restart_dummy.sh
-    destination: /home/ubuntu/dummy_app/scripts/
+  - source: treeseg/deploy/
+    destination: /home/ubuntu/treeseg/
 
 hooks:
-  BeforeInstall:
-    - location: demo/scripts/setup_dirs.sh   # match the artifact path
-      timeout: 30
-      runas: ubuntu
-
   AfterInstall:
-    - location: demo/scripts/restart_dummy.sh
-      timeout: 30
+    - location: treeseg/scripts/deploy.sh
+      timeout: 60
       runas: ubuntu
