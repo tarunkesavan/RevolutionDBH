@@ -60,3 +60,4 @@ artifacts:
   files:
     - appspec.yml
     - treeseg/deploy/**/*
+    - treeseg/scripts/**/*
