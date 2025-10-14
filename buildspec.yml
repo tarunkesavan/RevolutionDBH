@@ -3,12 +3,12 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo "Nothing to install for dummy build"
+      - echo "Nothing to install"
   build:
     commands:
-      - echo "Nothing to build for dummy file"
+      - echo "Nothing to build"
 
 artifacts:
   files:
-    - demo/dummy.txt
-    - demo/scripts/restart_dummy.sh
+    - appspec.yml           # make sure this is included
+    - demo/**/*             # include all demo files
