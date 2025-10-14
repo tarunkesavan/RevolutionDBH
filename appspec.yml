@@ -2,11 +2,11 @@ version: 0.0
 os: linux
 
 files:
-  - source: treeseg/deploy/
+  - source: treeseg/
     destination: /home/ubuntu/treeseg/
 
 hooks:
   AfterInstall:
-    - location: treeseg/scripts/deploy.sh
+    - location: /home/ubuntu/treeseg/scripts/deploy.sh
       timeout: 60
       runas: ubuntu
