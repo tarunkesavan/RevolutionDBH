@@ -1,0 +1,14 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Nothing to install for dummy build"
+  build:
+    commands:
+      - echo "Nothing to build for dummy file"
+
+artifacts:
+  files:
+    - demo/dummy.txt
+    - demo/scripts/restart_dummy.sh

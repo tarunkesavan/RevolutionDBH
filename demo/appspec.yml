@@ -1,0 +1,14 @@
+version: 0.0
+os: linux
+
+files:
+  - source: demo/dummy.txt            # path relative to artifact root
+    destination: /home/ec2-user/dummy_app/
+  - source: demo/scripts/restart_dummy.sh
+    destination: /home/ec2-user/dummy_app/scripts/
+
+hooks:
+  AfterInstall:
+    - location: /home/ec2-user/dummy_app/scripts/restart_dummy.sh
+      timeout: 30
+      runas: ec2-user
