@@ -58,4 +58,5 @@ phases:
 
 artifacts:
   files:
+    - appspec.yml
     - treeseg/deploy/**/*
