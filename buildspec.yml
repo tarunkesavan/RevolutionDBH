@@ -5,12 +5,24 @@ phases:
     commands:
       - echo "Installing dependencies"
       - sudo yum update -y --exclude=google-chrome-stable
-      - sudo yum install -y gcc gcc-c++ make cmake3 python3-devel pcl-devel
+      - echo "Enabling EPEL repository..."
+      - sudo amazon-linux-extras install epel -y
+      - echo "Installing build tools and core libraries..."
+      - sudo yum install -y gcc gcc-c++ make cmake3 python3-devel
+      - echo "Installing PCL dependencies..."
+      - sudo yum install -y boost-devel eigen3-devel flann-devel vtk-devel
+      - echo "Installing additional required libraries..."
+      - sudo yum install -y armadillo-devel libxlsxwriter-devel
+      - echo "Installing PCL..."
+      - sudo yum install -y pcl-devel || echo "PCL not available in repos, will need to build from source"
       - sudo alternatives --install /usr/bin/cmake cmake /usr/bin/cmake3 1
   pre_build:
     commands:
       - echo "Starting build..."
       - chmod +x ./treeseg/scripts/build.sh
+      # Update Python paths in CMakeLists.txt for Amazon Linux
+      - sed -i 's|/Library/Frameworks/Python.framework/Versions/3.11|/usr|g' treeseg/CMakeLists.txt
+      - sed -i 's|libpython3.11.dylib|libpython3.7m.so|g' treeseg/CMakeLists.txt
   build:
     commands:
       - echo "Running build script"
