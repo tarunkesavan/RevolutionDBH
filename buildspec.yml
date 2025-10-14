@@ -7,13 +7,25 @@ phases:
       - apt-get update
       - apt-get install -y build-essential cmake python3-dev
       - apt-get install -y libpcl-dev libarmadillo-dev libxlsxwriter-dev
+      - echo "Checking Python installation..."
+      - python3 --version
+      - python3-config --includes
   pre_build:
     commands:
       - echo "Starting build..."
       - chmod +x ./treeseg/scripts/build.sh
       - echo "Updating Python paths in CMakeLists.txt..."
-      - sed -i 's|/Library/Frameworks/Python.framework/Versions/3.11|/usr|g' treeseg/CMakeLists.txt
-      - sed -i 's|libpython3.11.dylib|libpython3.*so|g' treeseg/CMakeLists.txt
+      - |
+        PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+        PYTHON_INCLUDE=$(python3 -c "import sysconfig; print(sysconfig.get_path('include'))")
+        PYTHON_LIB=$(python3 -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
+        PYTHON_LIBNAME=$(python3 -c "import sysconfig; print(f\"libpython{sysconfig.get_config_var('LDVERSION')}.so\")")
+        echo "Python version: $PYTHON_VERSION"
+        echo "Python include: $PYTHON_INCLUDE"
+        echo "Python lib: $PYTHON_LIB/$PYTHON_LIBNAME"
+        sed -i "s|set(Python3_ROOT_DIR \"/Library/Frameworks/Python.framework/Versions/3.11\")|set(Python3_ROOT_DIR \"/usr\")|g" treeseg/CMakeLists.txt
+        sed -i "s|/Library/Frameworks/Python.framework/Versions/3.11/include/python3.11|$PYTHON_INCLUDE|g" treeseg/CMakeLists.txt
+        sed -i "s|/Library/Frameworks/Python.framework/Versions/3.11/lib/libpython3.11.dylib|$PYTHON_LIB/$PYTHON_LIBNAME|g" treeseg/CMakeLists.txt
   build:
     commands:
       - echo "Running build script"
