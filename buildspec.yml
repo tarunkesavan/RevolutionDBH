@@ -4,7 +4,6 @@ phases:
   install:
     commands:
       - echo "Installing dependencies"
-      - sudo yum update -y
       - sudo yum install -y gcc gcc-c++ make cmake3
       - sudo alternatives --install /usr/bin/cmake cmake /usr/bin/cmake3 1
   pre_build:
