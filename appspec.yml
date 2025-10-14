@@ -3,17 +3,17 @@ os: linux
 
 files:
   - source: demo/dummy.txt
-    destination: dummy_app/
+    destination: /home/ubuntu/dummy_app/
   - source: demo/scripts/restart_dummy.sh
-    destination: dummy_app/scripts/
+    destination: /home/ubuntu/dummy_app/scripts/
 
 hooks:
   BeforeInstall:
-    - location: scripts/setup_dirs.sh
+    - location: demo/scripts/setup_dirs.sh   # match the artifact path
       timeout: 30
       runas: ubuntu
 
   AfterInstall:
-    - location: scripts/restart_dummy.sh
+    - location: demo/scripts/restart_dummy.sh
       timeout: 30
       runas: ubuntu
