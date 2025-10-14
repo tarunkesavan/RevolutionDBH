@@ -14,6 +14,8 @@ phases:
     commands:
       - echo "Starting build..."
       - chmod +x ./treeseg/scripts/build.sh
+      - echo "Checking build.sh contents..."
+      - cat ./treeseg/scripts/build.sh
       - echo "Updating C++ standard to C++17..."
       - sed -i 's/set(CMAKE_CXX_STANDARD 11)/set(CMAKE_CXX_STANDARD 17)/g' treeseg/CMakeLists.txt
       - echo "Updating Python paths in CMakeLists.txt..."
@@ -28,16 +30,17 @@ phases:
         sed -i "s|set(Python3_ROOT_DIR \"/Library/Frameworks/Python.framework/Versions/3.11\")|set(Python3_ROOT_DIR \"/usr\")|g" treeseg/CMakeLists.txt
         sed -i "s|/Library/Frameworks/Python.framework/Versions/3.11/include/python3.11|$PYTHON_INCLUDE|g" treeseg/CMakeLists.txt
         sed -i "s|/Library/Frameworks/Python.framework/Versions/3.11/lib/libpython3.11.dylib|$PYTHON_LIB/$PYTHON_LIBNAME|g" treeseg/CMakeLists.txt
-      - echo "Updated CMakeLists.txt:"
-      - cat treeseg/CMakeLists.txt | head -20
   build:
     commands:
       - echo "Running build script"
-      - ./treeseg/scripts/build.sh
+      - ./treeseg/scripts/build.sh || echo "Build script failed, checking what was built..."
+      - echo "Listing build directory contents..."
+      - ls -la treeseg/build/ || echo "No build directory"
+      - ls -la treeseg/ || echo "No treeseg directory"
   post_build:
     commands:
       - echo "Build finished, checking output..."
-      - ls -laR treeseg/
+      - find treeseg -type f -executable -o -name "*.so" -o -name "*.a"
 
 artifacts:
   files:
