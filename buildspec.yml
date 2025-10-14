@@ -4,19 +4,22 @@ phases:
   install:
     commands:
       - echo "Installing dependencies"
+      - sudo yum update -y --exclude=google-chrome-stable
       - sudo yum install -y gcc gcc-c++ make cmake3
       - sudo alternatives --install /usr/bin/cmake cmake /usr/bin/cmake3 1
   pre_build:
     commands:
       - echo "Starting build..."
+      - chmod +x ./treeseg/scripts/build.sh
   build:
     commands:
       - echo "Running build script"
       - ./treeseg/scripts/build.sh
   post_build:
     commands:
-      - echo "Build finished, artifacts ready"
+      - echo "Build finished, checking output..."
+      - ls -laR treeseg/
 
 artifacts:
   files:
-    - treeseg/deploy/**/*
+    - '**/*'
