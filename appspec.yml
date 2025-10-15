@@ -3,6 +3,7 @@ os: linux
 files:
   - source: treeseg/
     destination: /home/ubuntu/treeseg_june26_2025/treeseg/
+    overwrite: yes  # 👈 add this line
 permissions:
   - object: /home/ubuntu/treeseg_june26_2025/
     owner: ubuntu
@@ -19,7 +20,7 @@ permissions:
 hooks:
   BeforeInstall:
     - location: treeseg/scripts/cleanup_build.sh
-      timeout: 300
+      timeout: 900
       runas: ubuntu
   AfterInstall:
     - location: treeseg/scripts/build_on_ec2.sh
