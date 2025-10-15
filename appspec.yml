@@ -1,18 +1,16 @@
 version: 0.0
 os: linux
-
 files:
-  # Copy the entire treeseg folder to EC2
-  - source: treeseg/
-    destination: /home/ubuntu/treeseg/
-
-# hooks:
-#   BeforeInstall:
-#     - location: /home/ubuntu/treeseg/scripts/build.sh
-#       timeout: 300
-#       runas: ubuntu
-
-#   AfterInstall:
-#     - location: /home/ubuntu/treeseg/scripts/deploy.sh
-#       timeout: 300
-#       runas: ubuntu
+  - source: treeseg/deploy/bin/
+    destination: /home/ubuntu/treeseg_june26_2025/treeseg/build/
+  - source: treeseg/deploy/lib/
+    destination: /home/ubuntu/treeseg_june26_2025/treeseg/build/
+hooks:
+  ApplicationStop:
+    - location: treeseg/scripts/stop_application.sh
+      timeout: 300
+      runas: ubuntu
+  ApplicationStart:
+    - location: treeseg/scripts/start_application.sh
+      timeout: 300
+      runas: ubuntu
