@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
 
-BUILD_DIR="/home/ubuntu/treeseg_june26_2025/treeseg/build"
+TARGET_DIR="/home/ubuntu/treeseg_june26_2025/treeseg"
 
-echo "Cleaning old build..."
-if [ -d "$BUILD_DIR" ]; then
-    rm -rf $BUILD_DIR/*
-    echo "Old build files removed"
+echo "Cleaning up old deployment at $TARGET_DIR..."
+if [ -d "$TARGET_DIR" ]; then
+    rm -rf "$TARGET_DIR"
+    echo "Old deployment removed."
 fi
 
 echo "Cleanup complete!"
