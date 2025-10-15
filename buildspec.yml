@@ -3,36 +3,9 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo "Installing dependencies"
-      - apt-get update
-      - apt-get install -y build-essential cmake python3-dev
-      - apt-get install -y libpcl-dev libarmadillo-dev libxlsxwriter-dev
-  pre_build:
-    commands:
-      - echo "Starting build..."
-      - chmod +x ./treeseg/scripts/build.sh
-      - echo "Updating C++ standard to C++17..."
-      - sed -i 's/set(CMAKE_CXX_STANDARD 11)/set(CMAKE_CXX_STANDARD 17)/g' treeseg/CMakeLists.txt
-      - echo "Updating Python paths in CMakeLists.txt..."
-      - |
-        PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
-        PYTHON_INCLUDE=$(python3 -c "import sysconfig; print(sysconfig.get_path('include'))")
-        PYTHON_LIB=$(python3 -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
-        PYTHON_LIBNAME=$(python3 -c "import sysconfig; print(f\"libpython{sysconfig.get_config_var('LDVERSION')}.so\")")
-        sed -i "s|set(Python3_ROOT_DIR \"/Library/Frameworks/Python.framework/Versions/3.11\")|set(Python3_ROOT_DIR \"/usr\")|g" treeseg/CMakeLists.txt
-        sed -i "s|/Library/Frameworks/Python.framework/Versions/3.11/include/python3.11|$PYTHON_INCLUDE|g" treeseg/CMakeLists.txt
-        sed -i "s|/Library/Frameworks/Python.framework/Versions/3.11/lib/libpython3.11.dylib|$PYTHON_LIB/$PYTHON_LIBNAME|g" treeseg/CMakeLists.txt
-  build:
-    commands:
-      - echo "Running build script"
-      - ./treeseg/scripts/build.sh
-  post_build:
-    commands:
-      - echo "Build complete! Checking artifacts..."
-      - ls -laR treeseg/deploy/
-
+      - echo "Packaging source code for deployment to EC2"
+      
 artifacts:
   files:
     - appspec.yml
-    - treeseg/deploy/**/*
-    - treeseg/scripts/**/*
+    - treeseg/**/*
