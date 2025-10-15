@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 	{
 		std::vector<std::string> id = getFileID(args[i]);
 		std::stringstream ss;
-		ss << id[0] << ".tile.downsample." << id[1] << ".pcd";
+		ss << id[0] << ".tileheyy.downsample." << id[1] << ".pcd";
 		reader.read(args[i],*original);
 		downsample(original,edgelength,downsampled,otree);
 		writer.write(ss.str(),*downsampled,true);
