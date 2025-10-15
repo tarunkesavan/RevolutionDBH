@@ -25,36 +25,11 @@ phases:
   build:
     commands:
       - echo "Running build script"
-      - cd treeseg
-      - mkdir -p build
-      - cd build
-      - cmake ..
-      - make -j$(nproc)
-      - cd $CODEBUILD_SRC_DIR
+      - ./treeseg/scripts/build.sh
   post_build:
     commands:
-      - echo "Organizing build artifacts..."
-      - mkdir -p treeseg/deploy/bin
-      - mkdir -p treeseg/deploy/lib
-      - echo "Copying executables..."
-      - cp treeseg/build/findstems treeseg/deploy/bin/ || echo "findstems not found"
-      - cp treeseg/build/downsample treeseg/deploy/bin/ || echo "downsample not found"
-      - cp treeseg/build/getdtmslice treeseg/deploy/bin/ || echo "getdtmslice not found"
-      - cp treeseg/build/nearestneighbour treeseg/deploy/bin/ || echo "nearestneighbour not found"
-      - cp treeseg/build/plotcoords treeseg/deploy/bin/ || echo "plotcoords not found"
-      - cp treeseg/build/segmentstem treeseg/deploy/bin/ || echo "segmentstem not found"
-      - cp treeseg/build/getcrownvolume treeseg/deploy/bin/ || echo "getcrownvolume not found"
-      - cp treeseg/build/segmentcrown treeseg/deploy/bin/ || echo "segmentcrown not found"
-      - cp treeseg/build/sepwoodleaf treeseg/deploy/bin/ || echo "sepwoodleaf not found"
-      - cp treeseg/build/pcdPointTreeseg2txt treeseg/deploy/bin/ || echo "pcdPointTreeseg2txt not found"
-      - cp treeseg/build/txtPointTreeseg2pcd treeseg/deploy/bin/ || echo "txtPointTreeseg2pcd not found"
-      - cp treeseg/build/pcdPointXYZRGB2txt treeseg/deploy/bin/ || echo "pcdPointXYZRGB2txt not found"
-      - cp treeseg/build/thin treeseg/deploy/bin/ || echo "thin not found"
-      - echo "Copying shared libraries..."
-      - cp treeseg/build/*.so treeseg/deploy/lib/ || echo "No .so files found"
-      - echo "Build artifacts ready:"
-      - ls -la treeseg/deploy/bin/
-      - ls -la treeseg/deploy/lib/
+      - echo "Build complete! Checking artifacts..."
+      - ls -laR treeseg/deploy/
 
 artifacts:
   files:
