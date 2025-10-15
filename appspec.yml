@@ -5,12 +5,21 @@ files:
     destination: /home/ubuntu/treeseg_june26_2025/treeseg/build/
   - source: treeseg/deploy/lib/
     destination: /home/ubuntu/treeseg_june26_2025/treeseg/build/
+permissions:
+  - object: /home/ubuntu/treeseg_june26_2025/treeseg/build/
+    owner: ubuntu
+    group: ubuntu
+    mode: 755
+    type:
+      - directory
+  - object: /home/ubuntu/treeseg_june26_2025/treeseg/build/*
+    owner: ubuntu
+    group: ubuntu
+    mode: 755
+    type:
+      - file
 hooks:
-  ApplicationStop:
-    - location: treeseg/scripts/stop_application.sh
-      timeout: 300
-      runas: ubuntu
-  ApplicationStart:
-    - location: treeseg/scripts/start_application.sh
+  BeforeInstall:
+    - location: treeseg/scripts/cleanup.sh
       timeout: 300
       runas: ubuntu
