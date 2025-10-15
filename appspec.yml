@@ -1,25 +1,31 @@
 version: 0.0
 os: linux
 files:
-  - source: treeseg/deploy/bin/
-    destination: /home/ubuntu/treeseg_june26_2025/treeseg/build/
-  - source: treeseg/deploy/lib/
-    destination: /home/ubuntu/treeseg_june26_2025/treeseg/build/
+  - source: treeseg/
+    destination: /home/ubuntu/treeseg_june26_2025/treeseg/
 permissions:
-  - object: /home/ubuntu/treeseg_june26_2025/treeseg/build/
+  - object: /home/ubuntu/treeseg_june26_2025/
     owner: ubuntu
     group: ubuntu
     mode: 755
     type:
       - directory
-  - object: /home/ubuntu/treeseg_june26_2025/treeseg/build/*
+  - object: /home/ubuntu/treeseg_june26_2025/treeseg/scripts/
     owner: ubuntu
     group: ubuntu
     mode: 755
     type:
-      - file
+      - directory
 hooks:
   BeforeInstall:
-    - location: treeseg/scripts/cleanup.sh
+    - location: treeseg/scripts/cleanup_build.sh
+      timeout: 300
+      runas: ubuntu
+  AfterInstall:
+    - location: treeseg/scripts/build_on_ec2.sh
+      timeout: 900
+      runas: ubuntu
+  ApplicationStart:
+    - location: treeseg/scripts/setup_environment.sh
       timeout: 300
       runas: ubuntu
