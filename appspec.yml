@@ -6,13 +6,13 @@ files:
   - source: treeseg/
     destination: /home/ubuntu/treeseg/
 
-hooks:
-  BeforeInstall:
-    - location: /home/ubuntu/treeseg/scripts/build.sh
-      timeout: 300
-      runas: ubuntu
+# hooks:
+#   BeforeInstall:
+#     - location: /home/ubuntu/treeseg/scripts/build.sh
+#       timeout: 300
+#       runas: ubuntu
 
-  AfterInstall:
-    - location: /home/ubuntu/treeseg/scripts/deploy.sh
-      timeout: 300
-      runas: ubuntu
+#   AfterInstall:
+#     - location: /home/ubuntu/treeseg/scripts/deploy.sh
+#       timeout: 300
+#       runas: ubuntu
