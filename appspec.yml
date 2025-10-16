@@ -3,7 +3,7 @@ os: linux
 files:
   - source: treeseg/
     destination: /home/ubuntu/treeseg_june26_2025/treeseg/
-    overwrite: yes  # 👈 add this line
+    overwrite: yes 
 permissions:
   - object: /home/ubuntu/treeseg_june26_2025/
     owner: ubuntu
