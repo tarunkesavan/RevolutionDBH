@@ -503,12 +503,7 @@ int main(int argc, char **argv)
     bool applyGCC = false;
 
     // Intiate Python interpreter 
-    Py_Initialize();
-    PyRun_SimpleString("import sys");
-    PyRun_SimpleString("sys.path.append('/Users/srnambur/Desktop/R-Evolution@Latest/AI_DBH_Analysis/Tarun_classifier')");
-    PyRun_SimpleString("print('sys.path:', sys.path)");
-    PyObject* pName = PyUnicode_FromString("ml-pipeline-gc-classifier-v3");
-    PyObject* pModule = PyImport_Import(pName);
+
 
     if (args.size() < 10) {
         std::cerr << "Usage: " << argv[0] << " <smoothness> <dmin> <dmax> <nmin> <nncluster> <lmin> <stepcovmax> <radratiomin> <coordfile> <pcdfile> [steps...]" << std::endl;
@@ -685,7 +680,14 @@ int main(int argc, char **argv)
 
 
     // PYTHON CODE RUN STARTS HERE==================
+	PyObject* pModule = nullptr;
     if (applyGCC) {
+    	Py_Initialize();
+    	PyRun_SimpleString("import sys");
+    	PyRun_SimpleString("sys.path.append('/Users/srnambur/Desktop/R-Evolution@Latest/AI_DBH_Analysis/Tarun_classifier')");
+    	PyRun_SimpleString("print('sys.path:', sys.path)");
+    	PyObject* pName = PyUnicode_FromString("ml-pipeline-gc-classifier-v3");
+    	PyObject* pModule = PyImport_Import(pName);
         std::vector<pcl::PointCloud<PointTreeseg>::Ptr> classifiedRegions;
         if (pModule) {
             PyObject* pFunc = PyObject_GetAttrString(pModule, "classify_pcd_folder");
