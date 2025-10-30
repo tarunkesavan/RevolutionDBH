@@ -90,6 +90,3 @@ target_link_libraries(txtPointTreeseg2pcd treeseg ${PCL_LIBRARIES})
 
 add_executable(pcdPointXYZRGB2txt ${CMAKE_SOURCE_DIR}/src/pcdPointXYZRGB2txt.cpp)
 target_link_libraries(pcdPointXYZRGB2txt ${PCL_LIBRARIES})
-
-add_executable(test_json ${CMAKE_SOURCE_DIR}/src/test_json.cpp)
-target_link_libraries(test_json nlohmann_json::nlohmann_json)
