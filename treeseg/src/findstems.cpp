@@ -16,6 +16,7 @@
 #include <pcl/point_types.h>
 #include <Python.h>
 #include <string>
+#include <nlohmann/json.hpp>
 
 std::ofstream outFile;
 namespace fs = std::filesystem;
@@ -201,9 +202,10 @@ void exportStemMetricsToExcel(const std::vector<std::pair<cylinder,CylinderMesh>
     lxw_worksheet *worksheet = workbook_add_worksheet(workbook, NULL);
     
     // Write headers
-	worksheet_write_string(worksheet, 0, 2, "Diameter", NULL);
-    worksheet_write_string(worksheet, 0, 0, "X", NULL);
-    worksheet_write_string(worksheet, 0, 1, "Y", NULL);
+	worksheet_write_string(worksheet, 0, 0, "X", NULL);
+	worksheet_write_string(worksheet, 0, 1, "Y", NULL);
+	worksheet_write_string(worksheet, 0, 3, "Center_Z", NULL); // <-- ADD THIS
+	worksheet_write_string(worksheet, 0, 4, "Diameter", NULL); // <-- MOVED from col 2
     
     // Create visualization point cloud with proper initialization
     pcl::PointCloud<PointTreeseg>::Ptr vizCloud(new pcl::PointCloud<PointTreeseg>);
@@ -231,9 +233,11 @@ void exportStemMetricsToExcel(const std::vector<std::pair<cylinder,CylinderMesh>
         Eigen::Vector3f centerAt03m = bottomPoint + (axis * 0.3f);
         
         // Write to Excel
-        worksheet_write_number(worksheet, row, 2, cyl.rad * 2, NULL);
-        worksheet_write_number(worksheet, row, 0, centerAt03m[0], NULL);
-        worksheet_write_number(worksheet, row, 1, centerAt03m[1], NULL);
+    	worksheet_write_number(worksheet, row, 0, centerAt03m[0], NULL); // X
+    	worksheet_write_number(worksheet, row, 1, centerAt03m[1], NULL); // Y
+    	worksheet_write_number(worksheet, row, 2, centerAt03m[2], NULL); // <-- ADD THIS (Z at 0.3m)
+    	worksheet_write_number(worksheet, row, 3, cyl.z, NULL);         // <-- ADD THIS (Center Z)
+    	worksheet_write_number(worksheet, row, 4, cyl.rad * 2, NULL);   // <-- MOVED from col 2
 
         // Create circle of points for visualization
 		for (int i = 0; i < numPoints; ++i) {
@@ -280,6 +284,66 @@ void exportStemMetricsToExcel(const std::vector<std::pair<cylinder,CylinderMesh>
     writer.write(viz_filename, *vizCloud, false);
 	// std::cout << "                      " << viz_filename << std::endl;
 }
+// ADD THE JSON EXPORT FUNCTION HERE
+void exportStemMetricsToJSON(
+	const std::vector<std::pair<cylinder,CylinderMesh>>& filteredCylinders,
+	const std::vector<int>& indices,
+	const std::string& name = "preds.dbh") {
+
+	using json = nlohmann::json;
+
+	// Get current date/time
+	time_t now = time(0);
+	struct tm tstruct;
+	char buf[80];
+	tstruct = *localtime(&now);
+	strftime(buf, sizeof(buf), "%Y%m%d_%H%M%S", &tstruct);
+
+	std::string nameLower = name;
+	std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+
+	// Create JSON structure
+	json output;
+	output["metadata"] = {
+		{"timestamp", std::string(buf)},
+		{"name", nameLower},
+		{"count", indices.size()}
+	};
+
+	json stems = json::array();
+
+	for(int k : indices) {
+		const cylinder& cyl = filteredCylinders[k].first;
+
+		// Calculate position at 0.3m height
+		Eigen::Vector3f axis(cyl.dx, cyl.dy, cyl.dz);
+		axis.normalize();
+		if (axis.z() < 0) axis = -axis;
+
+		Eigen::Vector3f bottomPoint = Eigen::Vector3f(cyl.x, cyl.y, cyl.z) - (axis * (cyl.len/2.0f));
+		Eigen::Vector3f centerAt03m = bottomPoint + (axis * 0.3f);
+
+		json stem = {
+			{"x", centerAt03m[0]},
+		  {"y", centerAt03m[1]},
+		  {"center_z", cyl.z},
+		  {"Diameter", cyl.rad * 2}
+		};
+
+		stems.push_back(stem);
+	}
+
+	output["stems"] = stems;
+
+	// Write to file
+	std::string json_filename = nameLower + ".preds.dbh." + std::string(buf) + ".json";
+	std::ofstream file(json_filename);
+	file << output.dump(4); // Pretty print with 4 space indent
+	file.close();
+
+	std::cout << "JSON saved: " << json_filename << std::endl;
+}
+
 
 void saveRegionsToFile(const std::vector<std::vector<int>>& regions, const std::string& filename = "regions.txt") {
     std::ofstream file(filename);
@@ -937,6 +1001,8 @@ int main(int argc, char **argv)
 
 	// Extract metrics and write to Excel
 	exportStemMetricsToExcel(filteredCylinders, idx, id[0]);
+
+	exportStemMetricsToJSON(filteredCylinders, idx, id[0]);
 
 	return 0;
 }
