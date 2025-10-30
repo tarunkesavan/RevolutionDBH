@@ -682,84 +682,81 @@ int main(int argc, char **argv)
     // PYTHON CODE RUN STARTS HERE==================
 	PyObject* pModule = nullptr;
     if (applyGCC) {
-    	Py_Initialize();
-    	PyRun_SimpleString("import sys");
-    	PyRun_SimpleString("sys.path.append('/Users/srnambur/Desktop/R-Evolution@Latest/AI_DBH_Analysis/Tarun_classifier')");
-    	PyRun_SimpleString("print('sys.path:', sys.path)");
-    	PyObject* pName = PyUnicode_FromString("ml-pipeline-gc-classifier-v3");
-    	PyObject* pModule = PyImport_Import(pName);
-        std::vector<pcl::PointCloud<PointTreeseg>::Ptr> classifiedRegions;
-        if (pModule) {
-            PyObject* pFunc = PyObject_GetAttrString(pModule, "classify_pcd_folder");
-            if (pFunc && PyCallable_Check(pFunc)) {
-                // PyObject* pArgs = PyTuple_Pack(1, PyUnicode_FromString("/Users/srnambur/Desktop/R-Evolution@Latest/AI_DBH_Analysis/data/119-Data/output/cluster/regions/"));
-                PyObject* pArgs = PyTuple_Pack(1, PyUnicode_FromString(input_folder.c_str()));
+    Py_Initialize();
+    PyRun_SimpleString("import sys");
+    PyRun_SimpleString("sys.path.append('/Users/srnambur/Desktop/R-Evolution@Latest/AI_DBH_Analysis/Tarun_classifier')");
+    PyRun_SimpleString("print('sys.path:', sys.path)");
 
-                // Call the function
-                PyObject* pValue = PyObject_CallObject(pFunc, pArgs);
-                std::vector<std::map<std::string, std::string>> result;
-                Py_DECREF(pArgs);
-                if (PyList_Check(pValue)) {
-                    Py_ssize_t list_size = PyList_Size(pValue);
-                    PyObject* repr = PyObject_Repr(pValue);
-                    if (repr && PyUnicode_Check(repr)) {
-                        const char* dictStr = PyUnicode_AsUTF8(repr);
+    PyObject* pName = PyUnicode_FromString("ml-pipeline-gc-classifier-v3");
+    pModule = PyImport_Import(pName);  // ✅ REMOVE the type declaration here!
 
-                        std::ofstream outFile(classifierOutput);
-                        if (outFile.is_open()) {
-                            outFile << dictStr;  // Save exactly as string
-                            outFile.close();
-                        } else {
-                            std::cerr << "Failed to open file: " << classifierOutput << std::endl;
-                        }
+    std::vector<pcl::PointCloud<PointTreeseg>::Ptr> classifiedRegions;
 
-                        Py_DECREF(repr);
+    if (pModule) {
+        PyObject* pFunc = PyObject_GetAttrString(pModule, "classify_pcd_folder");
+        if (pFunc && PyCallable_Check(pFunc)) {
+            PyObject* pArgs = PyTuple_Pack(1, PyUnicode_FromString(input_folder.c_str()));
+            PyObject* pValue = PyObject_CallObject(pFunc, pArgs);
+            std::vector<std::map<std::string, std::string>> result;
+            Py_DECREF(pArgs);
+
+            if (PyList_Check(pValue)) {
+                Py_ssize_t list_size = PyList_Size(pValue);
+                PyObject* repr = PyObject_Repr(pValue);
+                if (repr && PyUnicode_Check(repr)) {
+                    const char* dictStr = PyUnicode_AsUTF8(repr);
+                    std::ofstream outFile(classifierOutput);
+                    if (outFile.is_open()) {
+                        outFile << dictStr;
+                        outFile.close();
                     } else {
-                        std::cerr << "Failed to convert PyDict to string." << std::endl;
+                        std::cerr << "Failed to open file: " << classifierOutput << std::endl;
                     }
-                    for (Py_ssize_t i = 0; i < list_size; ++i) {
-                        PyObject* pyDict = PyList_GetItem(pValue, i);
-                        if (PyDict_Check(pyDict)) { 
-                            std::map<std::string, std::string> cppDict;
-                            PyObject* pathValue = PyDict_GetItemString(pyDict, "file");
-                            if (pathValue && PyUnicode_Check(pathValue)) { 
-                                const char* pathStr = PyUnicode_AsUTF8(pathValue);
-                                if (pathStr) {
-                                    // std::cout << "Result from Python filepath: " << pathStr << std::endl;
-                                    fs::path full_path = fs::path(input_folder) / pathStr;
-                                    std::string full_path_str = full_path.string();
-
-                                    pcl::PointCloud<PointTreeseg>::Ptr cloud(new pcl::PointCloud<PointTreeseg>);
-                                    if (pcl::io::loadPCDFile<PointTreeseg>(full_path_str, *cloud) == -1) {
-                                        PCL_ERROR("Couldn't read file %s \n", full_path_str.c_str());
-                                        continue;
-                                    }
-
-                                    // std::cout << "Loaded " << cloud->points.size() << " data points from " << full_path_str << std::endl;
-                                    classifiedRegions.push_back(cloud);
-                                }
-                            }
-                            
-                        }
-
-                    }
-                    Py_DECREF(pValue);
+                    Py_DECREF(repr);
                 } else {
-                    PyErr_Print();
+                    std::cerr << "Failed to convert PyDict to string." << std::endl;
                 }
-                Py_XDECREF(pFunc);
+
+                for (Py_ssize_t i = 0; i < list_size; ++i) {
+                    PyObject* pyDict = PyList_GetItem(pValue, i);
+                    if (PyDict_Check(pyDict)) {
+                        std::map<std::string, std::string> cppDict;
+                        PyObject* pathValue = PyDict_GetItemString(pyDict, "file");
+                        if (pathValue && PyUnicode_Check(pathValue)) {
+                            const char* pathStr = PyUnicode_AsUTF8(pathValue);
+                            if (pathStr) {
+                                fs::path full_path = fs::path(input_folder) / pathStr;
+                                std::string full_path_str = full_path.string();
+                                pcl::PointCloud<PointTreeseg>::Ptr cloud(new pcl::PointCloud<PointTreeseg>);
+                                if (pcl::io::loadPCDFile<PointTreeseg>(full_path_str, *cloud) == -1) {
+                                    PCL_ERROR("Couldn't read file %s \n", full_path_str.c_str());
+                                    continue;
+                                }
+                                classifiedRegions.push_back(cloud);
+                            }
+                        }
+                    }
+                }
+                Py_DECREF(pValue);
             } else {
                 PyErr_Print();
             }
-            Py_DECREF(pModule);
+            Py_XDECREF(pFunc);
         } else {
             PyErr_Print();
         }
-        std::cout << "Number of classified regions: " << classifiedRegions.size() << std::endl;
-        std::cout << "Python module loaded and executed successfully." << std::endl;
-        regions = classifiedRegions;
+        Py_DECREF(pModule);
+    } else {
+        std::cerr << "Failed to load Python module!" << std::endl;
+        PyErr_Print();
     }
-    Py_Finalize();
+
+    std::cout << "Number of classified regions: " << classifiedRegions.size() << std::endl;
+    std::cout << "Python module loaded and executed successfully." << std::endl;
+    regions = classifiedRegions;
+
+    Py_Finalize();  // ✅ Move this INSIDE the if block!
+}
 
     if (applyFilter) {
         std::vector<pcl::PointCloud<PointTreeseg>::Ptr> filteredRegions;
